@@ -7,8 +7,10 @@ import pygame, pygame_gui
 import sys, random
 
 SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
-LABEL_COLOR = (255, 255, 255)
 LINK_COLOR  = (255, 255, 255)
+LABEL_COLOR = (255, 255, 255)
+START_COLOR = (0, 255, 0)
+DEST_COLOR  = (255,0,0)
 FPS         = 144
 LINE_WIDTH  = 5
 
@@ -17,25 +19,29 @@ screen   = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 fpsClock = pygame.time.Clock()
 font     = pygame.font.SysFont('Comic Sans', 20)
 
-running      = True
 draggingNode = False
+running      = True
 selected     = None
 linkStart    = None
-cityNumber   = 1
+sIndex       = None
+dIndex       = None
 graph        = {}
 linkDestList = []
 nodeList     = []
 labelList    = []
+cityNumber   = 1
 
 class Node:
     neighbors = []
-    def __init__ (self, color, rect, radius, city, parent=None, locked=False):
+    def __init__ (self, color, rect, radius, city, parent=None, locked=False, start=False, dest=False):
         self.color  = color
         self.rect   = rect
         self.radius = radius
         self.city   = city
         self.parent = parent
         self.locked = locked
+        self.start  = start
+        self.dest   = dest
         
     def linkNodes(self, nodeDest):
         self.neighbors.append(nodeDest)
@@ -88,9 +94,10 @@ while running:
                         selected = i
                         if linkStart == None:
                             linkStart = nodeList[selected]
+                            sIndex = selected
                         else:
-                            linkDest = nodeList[selected]
                             linkDestList.append(nodeList[selected])
+                            dIndex = selected
                 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -136,11 +143,29 @@ while running:
                         labelList.append(Label("STATUS: Link(s) deleted.", LABEL_COLOR, (0,0),100,200))
                     linkStart = None
                     linkDestList.clear()
+                else:
+                    linkStart = None
+                    
+            if event.key == pygame.K_m:
+                if linkStart != None and len(linkDestList) == 1:
+                    for node in nodeList:
+                        node.color = (255,255,255)
+                    start = nodeList[sIndex]
+                    dest  = nodeList[dIndex]
+                    start.color = START_COLOR
+                    start.start = True
+                    dest.color  = DEST_COLOR
+                    dest.dest   = True
+                    nodeList[sIndex] = start
+                    nodeList[dIndex] = dest
+                    linkStart = None
+                    linkDestList.clear()
                     
             if event.key == pygame.K_DELETE:
                 graph = {}
                 nodeList.clear()
                 labelList = []
+                cityNumber = 1
                 labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0),100,200))
     
     for node in graph:
