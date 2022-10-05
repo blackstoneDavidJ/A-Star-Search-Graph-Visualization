@@ -1,7 +1,7 @@
 # A-Star-Search-Graph-Visualization
 Program to create a mock map with city nodes and road connections
 The program will then be able to, given a start city and end city, show user the shortest path to their destination
-This is meant to be a very simplified vision of Google Maps!
+This is meant to be a very simplified version of Google Maps!
 -----------------------------------
 Controls:
 
