@@ -1,38 +1,39 @@
-from os import link
-from turtle import pos
+'''
+David Blackstone
+A* search graph visualization
+10/5/22
+'''
 import pygame, pygame_gui 
 import sys, random
 
 SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
-FPS = 144
 LABEL_COLOR = (255, 255, 255)
-LINK_COLOR = (255, 255, 255)
-LINE_WIDTH = 5
+LINK_COLOR  = (255, 255, 255)
+FPS         = 144
+LINE_WIDTH  = 5
 
 pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen   = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 fpsClock = pygame.time.Clock()
-font = pygame.font.SysFont('Comic Sans', 20)
+font     = pygame.font.SysFont('Comic Sans', 20)
 
-running = True
+running      = True
 draggingNode = False
-selected = None
-cityNumber = 1
-
-linkStart = None
-linkDest = None
+selected     = None
+linkStart    = None
+cityNumber   = 1
+graph        = {}
 linkDestList = []
-graph = {}
-nodeList = []
-labelList = []
+nodeList     = []
+labelList    = []
 
 class Node:
     neighbors = []
     def __init__ (self, color, rect, radius, city, parent=None, locked=False):
-        self.color = color
-        self.rect = rect
+        self.color  = color
+        self.rect   = rect
         self.radius = radius
-        self.city = city
+        self.city   = city
         self.parent = parent
         self.locked = locked
         
@@ -41,11 +42,11 @@ class Node:
 
 class Label:
     def __init__(self, text, color, position, width, height):
-        self.text = text
-        self.color = color
+        self.text     = text
+        self.color    = color
         self.position = position
-        self.width = width
-        self.height = height
+        self.width    = width
+        self.height   = height
         
 labelList.append(Label("STATUS: No status.", LABEL_COLOR, (0,0),100,200))
 while running:
@@ -76,6 +77,7 @@ while running:
                         selected = i
                         selected_offset_x = node.rect.x - event.pos[0]
                         selected_offset_y = node.rect.y - event.pos[1]
+                        
             elif event.button == 3:
                 draggingNode = False
                 for i, node in enumerate(nodeList):
@@ -152,7 +154,6 @@ while running:
         for label in labelList:
             screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
 
-    pygame.display.set_caption("FPS: " +str(int(fpsClock.get_fps())) 
-        +" X: " +str(pygame.mouse.get_pos()[0])+"-Y: " +str(pygame.mouse.get_pos()[1]))
+    pygame.display.set_caption("FPS: " +str(int(fpsClock.get_fps())))
     pygame.display.flip()
     fpsClock.tick(FPS)
