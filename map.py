@@ -176,8 +176,8 @@ while running:
         for neighbor in neighbors:
             pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center, LINE_WIDTH)
         
-        for label in labelList:
-            screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
+    for label in labelList:
+        screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
 
     pygame.display.set_caption("FPS: " +str(int(fpsClock.get_fps())))
     pygame.display.flip()
