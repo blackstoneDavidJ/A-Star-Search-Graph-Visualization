@@ -1,12 +1,12 @@
-
 from os import link
+from turtle import pos
 import pygame, pygame_gui 
 import sys, random
 
-SCREEN_HEIGHT, SCREEN_WIDTH = (850, 850)
+SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
 FPS = 144
-LABEL_COLOR = (255,255,255)
-LINK_COLOR = (255,255,255)
+LABEL_COLOR = (255, 255, 255)
+LINK_COLOR = (255, 255, 255)
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -15,24 +15,34 @@ font = pygame.font.SysFont('Comic Sans', 20)
 
 running = True
 draggingNode = False
-nodeList = []
 selected = None
 cityNumber = 1
 
 linkStart = None
-linkStartIndex = None
 linkDest = None
-linkDestIndex = None
-linkNum = 0
+graph = {}
+nodeList = []
+labelList = []
 
 class Node:
-    def __init__ (self, color, rect, radius, city, parent=None, neighbors = []):
+    neighbors = []
+    def __init__ (self, color, rect, radius, city, parent=None):
         self.color = color
         self.rect = rect
         self.radius = radius
         self.city = city
         self.parent = parent
-        self.neighbors = neighbors
+        
+    def linkNodes(self, nodeDest):
+        self.neighbors.append(nodeDest)
+
+class Label:
+    def __init__(self, text, color, position, width, height):
+        self.text = text
+        self.color = color
+        self.position = position
+        self.width = width
+        self.height = height
         
 while running:
     screen.fill((20, 20, 20))
@@ -63,7 +73,6 @@ while running:
                         selected_offset_x = node.rect.x - event.pos[0]
                         selected_offset_y = node.rect.y - event.pos[1]
             elif event.button == 3:
-                print("Link #" +str(linkNum))
                 for i, node in enumerate(nodeList):
                     dx = node.rect.centerx - event.pos[0]
                     dy = node.rect.centery - event.pos[1]
@@ -72,20 +81,8 @@ while running:
                         selected = i
                         if linkStart == None:
                             linkStart = nodeList[selected]
-                            linkStartIndex = selected
-                            print(linkStart.city)
                         else:
                             linkDest = nodeList[selected]
-                            linkDestIndex = selected
-                            print(linkDest.city)
-                        if linkStartIndex != None and linkDestIndex != None:    
-                            if linkStart != None and linkDest != None and node == nodeList[linkStartIndex] or node == nodeList[linkDestIndex]:
-                                nodeList[linkStartIndex].neighbors.append(nodeList[linkDestIndex])
-                                linkStart = None
-                                linkStartIndex = None
-                                linkDest = None
-                                linkDestIndex = None
-                                break
                 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_c:
@@ -95,16 +92,34 @@ while running:
                 blockSize = radius * 2
                 circleNode = Node(nodeColor, pygame.Rect(currPos[0]-radius, currPos[1]-radius, blockSize, blockSize), radius, cityNumber)
                 nodeList.append(circleNode)
+                if circleNode not in graph.keys():
+                    graph[circleNode] = []
                 cityNumber += 1
+                print(graph)
+            if event.key == pygame.K_l:
+                if linkStart != None and linkDest != None:
+                    sNeighbors = graph[linkStart]
+                    dNeighbors = graph[linkDest]
+                    sNeighbors.append(linkDest)
+                    dNeighbors.append(linkStart)
+                    graph[linkStart] = sNeighbors
+                    graph[linkDest] = dNeighbors
+                    labelList = []
+                    labelList.append(Label("City #"+str(linkStart.city) +" linked with City #"+str(linkDest.city), LABEL_COLOR, (0,0),100,200))
+                    linkStart = None
+                    linkDest = None
     
-    for node in nodeList:
+    for node in graph:
         pygame.draw.circle(screen, node.color, node.rect.center, node.radius)
         screen.blit(font.render("City #"+str(node.city), True, LABEL_COLOR), (node.rect.center[0]-node.radius/2, node.rect.center[1]-node.radius/2))
         
-        if len(node.neighbors) > 0:
-            for i in range(len(node.neighbors)):
-                pygame.draw.line(screen, LINK_COLOR, node.rect.center, node.neighbors[i].rect.center)
-        #print(node.city)
+        neighbors = graph[node]
+        for neighbor in neighbors:
+            pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center)
+        
+        for label in labelList:
+            screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
+
     pygame.display.set_caption("FPS: " +str(int(fpsClock.get_fps())) 
         +" X: " +str(pygame.mouse.get_pos()[0])+"-Y: " +str(pygame.mouse.get_pos()[1]))
     pygame.display.flip()
