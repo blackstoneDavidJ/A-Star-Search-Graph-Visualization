@@ -7,6 +7,7 @@ SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
 FPS = 144
 LABEL_COLOR = (255, 255, 255)
 LINK_COLOR = (255, 255, 255)
+LINE_WIDTH = 5
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -20,18 +21,20 @@ cityNumber = 1
 
 linkStart = None
 linkDest = None
+linkDestList = []
 graph = {}
 nodeList = []
 labelList = []
 
 class Node:
     neighbors = []
-    def __init__ (self, color, rect, radius, city, parent=None):
+    def __init__ (self, color, rect, radius, city, parent=None, locked=False):
         self.color = color
         self.rect = rect
         self.radius = radius
         self.city = city
         self.parent = parent
+        self.locked = locked
         
     def linkNodes(self, nodeDest):
         self.neighbors.append(nodeDest)
@@ -44,6 +47,7 @@ class Label:
         self.width = width
         self.height = height
         
+labelList.append(Label("STATUS: No status.", LABEL_COLOR, (0,0),100,200))
 while running:
     screen.fill((20, 20, 20))
     for event in pygame.event.get():
@@ -73,6 +77,7 @@ while running:
                         selected_offset_x = node.rect.x - event.pos[0]
                         selected_offset_y = node.rect.y - event.pos[1]
             elif event.button == 3:
+                draggingNode = False
                 for i, node in enumerate(nodeList):
                     dx = node.rect.centerx - event.pos[0]
                     dy = node.rect.centery - event.pos[1]
@@ -83,8 +88,14 @@ while running:
                             linkStart = nodeList[selected]
                         else:
                             linkDest = nodeList[selected]
+                            linkDestList.append(nodeList[selected])
                 
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
+                pygame.quit()
+                sys.exit()
+            
             if event.key == pygame.K_c:
                 nodeColor = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
                 radius = random.randint(25, 100)
@@ -95,19 +106,40 @@ while running:
                 if circleNode not in graph.keys():
                     graph[circleNode] = []
                 cityNumber += 1
-                print(graph)
+                
             if event.key == pygame.K_l:
-                if linkStart != None and linkDest != None:
+                if linkStart != None and len(linkDestList) > 0:
                     sNeighbors = graph[linkStart]
-                    dNeighbors = graph[linkDest]
-                    sNeighbors.append(linkDest)
-                    dNeighbors.append(linkStart)
-                    graph[linkStart] = sNeighbors
-                    graph[linkDest] = dNeighbors
-                    labelList = []
-                    labelList.append(Label("City #"+str(linkStart.city) +" linked with City #"+str(linkDest.city), LABEL_COLOR, (0,0),100,200))
+                    for dest in linkDestList:
+                        dNeighbors = graph[dest]
+                        sNeighbors.append(dest)
+                        dNeighbors.append(linkStart)
+                        graph[linkStart] = sNeighbors
+                        graph[dest] = dNeighbors
+                        labelList = []
+                        labelList.append(Label("STATUS: Link(s) created.", LABEL_COLOR, (0,0),100,200))
                     linkStart = None
-                    linkDest = None
+                    linkDestList.clear()
+                    
+            if event.key == pygame.K_r:
+                if linkStart != None and len(linkDestList) > 0:
+                    sNeighbors = graph[linkStart]
+                    for dest in linkDestList:
+                        dNeighbors = graph[dest]
+                        sNeighbors.remove(dest)
+                        dNeighbors.remove(linkStart)
+                        graph[linkStart] = sNeighbors
+                        graph[dest] = dNeighbors
+                        labelList = []
+                        labelList.append(Label("STATUS: Link(s) deleted.", LABEL_COLOR, (0,0),100,200))
+                    linkStart = None
+                    linkDestList.clear()
+                    
+            if event.key == pygame.K_DELETE:
+                graph = {}
+                nodeList.clear()
+                labelList = []
+                labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0),100,200))
     
     for node in graph:
         pygame.draw.circle(screen, node.color, node.rect.center, node.radius)
@@ -115,7 +147,7 @@ while running:
         
         neighbors = graph[node]
         for neighbor in neighbors:
-            pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center)
+            pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center, LINE_WIDTH)
         
         for label in labelList:
             screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
