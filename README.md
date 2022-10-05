@@ -20,4 +20,3 @@ Keyboard inputs:
 
 Preview of current program:
 ![2022-10-05 (1)](https://user-images.githubusercontent.com/62959991/193979555-83928077-aeb5-40b7-9c3d-14d4006c3c28.png)
-![2022-10-05](https://user-images.githubusercontent.com/62959991/193979551-68406918-dc18-424b-8d71-4e2fbbf0f98b.png)
