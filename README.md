@@ -13,8 +13,8 @@ Mouse inputs:
 
 Keyboard inputs:
 - "c"      = Create city node at given mouse(x,y).
-- "l"      = Will create links between respective selected city nodes.
-- "r"      = Will remove links between respective selected city nodes.
+- "l"      = Will create links between selected city nodes.
+- "r"      = Will remove links between selected city nodes.
 - "DELETE" = Resets the map.
 - "ESCAPE" = Will exit the program.
 
