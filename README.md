@@ -4,6 +4,7 @@ The program will then be able to, given a start city and end city, show user the
 This is meant to be a very simplified vision of Google Maps!
 -----------------------------------
 Controls:
+
 Mouse inputs:
 "LEFT_CLICK"  = If clicked and held over a city nodes, will allow user to move city node
 "RIGHT_CLICK" = If clicked on a city node will allow user to link city nodes together.
