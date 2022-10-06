@@ -4,11 +4,12 @@ A* search graph visualization
 10/5/22
 '''
 import pygame, pygame_gui 
-import sys, random
+import sys, random, math, copy
 
 SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
 LINK_COLOR  = (255, 255, 255)
 LABEL_COLOR = (255, 255, 255)
+PATH_COLOR  = (255, 0, 0)
 START_COLOR = (0, 255, 0)
 DEST_COLOR  = (255,0,0)
 FPS         = 144
@@ -29,22 +30,30 @@ graph        = {}
 linkDestList = []
 nodeList     = []
 labelList    = []
+path         = []
 cityNumber   = 1
 
+start = None
+dest = None
+
 class Node:
-    neighbors = []
-    def __init__ (self, color, rect, radius, city, parent=None, locked=False, start=False, dest=False):
+    gCost = 0
+    hCost = 0
+    def __init__ (self, color, rect, radius, city, parent=None, start=False, dest=False, onPath=False):
         self.color  = color
         self.rect   = rect
         self.radius = radius
         self.city   = city
         self.parent = parent
-        self.locked = locked
         self.start  = start
         self.dest   = dest
+        self.onPath = onPath
         
     def linkNodes(self, nodeDest):
         self.neighbors.append(nodeDest)
+    
+    def getFCost(self):
+        return self.gCost + self.hCost
 
 class Label:
     def __init__(self, text, color, position, width, height):
@@ -53,6 +62,65 @@ class Label:
         self.position = position
         self.width    = width
         self.height   = height
+
+def getDistance(currNode, destNode):
+    x1 = currNode.rect.center[0]
+    y1 = currNode.rect.center[1]
+    
+    x2 = destNode.rect.center[0]
+    y2 = destNode.rect.center[1]
+    
+    curr = (x1, x2)
+    dest = (x2, y2)
+    
+    return math.dist(curr, dest)
+
+def getEndNode(closedList, x, y):
+    for node in closedList:
+        if node.rect.center[0] == x and node.rect.center[1] == y:
+            return node
+    return False    
+        
+def findShortestPath():
+    openList = []
+    closedList = []
+    openList.append(start)
+    endFound = False
+    while len(openList) > 0 or not endFound:
+        currNode = openList[0]
+        for i in range(len(openList)):
+            if(openList[i].getFCost() < currNode.getFCost()) or openList[i].getFCost() == currNode.getFCost() and openList[i].hCost < currNode.hCost:
+                currNode = openList[i]
+        openList.remove(currNode)
+        closedList.append(currNode)
+        
+        if currNode.rect.center[0] == dest.rect.center[0] and currNode.rect.center[1] == dest.rect.center[1]:
+            endFound = True 
+            
+        neighborsList = graph[currNode]
+        for node in neighborsList:
+            if node not in closedList:
+                newMovementCost = currNode.gCost + getDistance(currNode, node)
+                if node not in openList or newMovementCost < node.gCost:
+                    node.gCost = newMovementCost
+                    node.hCost = getDistance(node, dest)
+                    node.parent = currNode
+                    if node not in openList:
+                        openList.append(node)
+    
+    curr = getEndNode(closedList, dest.rect.center[0], dest.rect.center[1])
+    path = []
+    while curr!= start:
+        path.append(curr)
+        curr = curr.parent
+    path.append(start)
+    return path
+        
+def shortestPath():
+    path = findShortestPath()
+    path.reverse()
+    for node in path:
+        node.onPath = True
         
 labelList.append(Label("STATUS: No status.", LABEL_COLOR, (0,0),100,200))
 while running:
@@ -83,7 +151,11 @@ while running:
                         selected = i
                         selected_offset_x = node.rect.x - event.pos[0]
                         selected_offset_y = node.rect.y - event.pos[1]
-                        
+                if start != None and dest != None:
+                    for node in graph:
+                        node.onPath = False
+                    shortestPath()
+                    
             elif event.button == 3:
                 draggingNode = False
                 for i, node in enumerate(nodeList):
@@ -149,7 +221,7 @@ while running:
             if event.key == pygame.K_m:
                 if linkStart != None and len(linkDestList) == 1:
                     for node in nodeList:
-                        node.color = (255,255,255)
+                        node.color = (100,100,100)
                     start = nodeList[sIndex]
                     dest  = nodeList[dIndex]
                     start.color = START_COLOR
@@ -160,7 +232,12 @@ while running:
                     nodeList[dIndex] = dest
                     linkStart = None
                     linkDestList.clear()
-                    
+            if event.key == pygame.K_s:
+                path = findShortestPath()
+                path.reverse()
+                for node in path:
+                    node.onPath = True
+                path = []
             if event.key == pygame.K_DELETE:
                 graph = {}
                 nodeList.clear()
@@ -169,13 +246,22 @@ while running:
                 labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0),100,200))
     
     for node in graph:
+    
         pygame.draw.circle(screen, node.color, node.rect.center, node.radius)
-        screen.blit(font.render("City #"+str(node.city), True, LABEL_COLOR), (node.rect.center[0]-node.radius/2, node.rect.center[1]-node.radius/2))
-        
         neighbors = graph[node]
         for neighbor in neighbors:
-            pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center, LINE_WIDTH)
-        
+            if node.onPath and neighbor.onPath:
+                pygame.draw.line(screen, PATH_COLOR, node.rect.center, neighbor.rect.center, LINE_WIDTH)
+            else:
+                pygame.draw.line(screen, LINK_COLOR, node.rect.center, neighbor.rect.center, LINE_WIDTH)
+            
+        if node.start == True:
+            cityLabel = "Start"
+        elif node.dest == True:
+            cityLabel = "Destination"
+        else:
+            cityLabel = ("City #"+str(node.city))
+        screen.blit(font.render(cityLabel, True, (0,0, 255)), (node.rect.center[0]-node.radius/2, node.rect.center[1]-node.radius/2))
     for label in labelList:
         screen.blit(font.render(label.text, True, label.color), (label.position[0], label.position[1], label.width, label.height))
 
