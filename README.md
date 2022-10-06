@@ -20,7 +20,6 @@ Keyboard inputs:
 - "DELETE" = Resets the map.
 - "ESCAPE" = Will exit the program.
 
-Preview of current program:
 Map showing the shortest path between start and destination cities!
 ![2022-10-06 (6)](https://user-images.githubusercontent.com/62959991/194217646-e652eeda-b37d-47de-85f4-958f9d320e3e.png)
 Map after some city node movements, notice path has updated!
