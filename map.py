@@ -11,12 +11,12 @@ LINK_COLOR  = (255, 255, 255)
 LABEL_COLOR = (255, 255, 255)
 PATH_COLOR  = (255, 0, 0)
 START_COLOR = (0, 255, 0)
-DEST_COLOR  = (255,0,0)
+DEST_COLOR  = (255, 0, 0)
 FPS         = 144
 LINE_WIDTH  = 5
 
 pygame.init()
-screen   = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen   = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 fpsClock = pygame.time.Clock()
 font     = pygame.font.SysFont('Comic Sans', 20)
 
@@ -70,7 +70,7 @@ def getDistance(currNode, destNode):
     x2 = destNode.rect.center[0]
     y2 = destNode.rect.center[1]
     
-    curr = (x1, x2)
+    curr = (x1, y1)
     dest = (x2, y2)
     
     return math.dist(curr, dest)
