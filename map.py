@@ -3,8 +3,8 @@ David Blackstone
 A* search graph visualization
 10/5/22
 '''
-import pygame, pygame_gui 
-import sys, random, math, copy
+import pygame
+import sys, random, math
 
 SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
 LINK_COLOR  = (255, 255, 255)
@@ -48,9 +48,6 @@ class Node:
         self.start  = start
         self.dest   = dest
         self.onPath = onPath
-        
-    def linkNodes(self, nodeDest):
-        self.neighbors.append(nodeDest)
     
     def getFCost(self):
         return self.gCost + self.hCost
@@ -69,11 +66,8 @@ def getDistance(currNode, destNode):
     
     x2 = destNode.rect.center[0]
     y2 = destNode.rect.center[1]
-    
-    curr = (x1, y1)
-    dest = (x2, y2)
-    
-    return math.dist(curr, dest)
+
+    return math.dist((x1, y1), (x2, y2))
 
 def getEndNode(closedList, x, y):
     for node in closedList:
@@ -151,10 +145,10 @@ while running:
                         selected = i
                         selected_offset_x = node.rect.x - event.pos[0]
                         selected_offset_y = node.rect.y - event.pos[1]
-                if start != None and dest != None:
-                    for node in graph:
-                        node.onPath = False
-                    shortestPath()
+                        if start != None and dest != None:
+                            for node in graph:
+                                node.onPath = False
+                            shortestPath()
                     
             elif event.button == 3:
                 draggingNode = False
@@ -223,6 +217,7 @@ while running:
                     for node in nodeList:
                         node.color = (100,100,100)
                     start = nodeList[sIndex]
+                    startIndexPrev = sIndex
                     dest  = nodeList[dIndex]
                     start.color = START_COLOR
                     start.start = True
@@ -244,9 +239,14 @@ while running:
                 labelList = []
                 cityNumber = 1
                 labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0),100,200))
+            if event.key == pygame.K_n:
+                if linkStart != None:
+                    nodeList[startIndexPrev].dest = False
+                    nodeList[sIndex].dest = True
+                    dest = linkStart
+                    linkStart = None
     
     for node in graph:
-    
         pygame.draw.circle(screen, node.color, node.rect.center, node.radius)
         neighbors = graph[node]
         for neighbor in neighbors:
