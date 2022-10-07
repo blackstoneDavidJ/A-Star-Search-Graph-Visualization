@@ -23,6 +23,7 @@ Keyboard inputs:
 Previews:
 
 Map showing the shortest path between start and destination cities!
+![Screenshot_108](https://user-images.githubusercontent.com/62959991/194614572-0a202929-17aa-49e2-a628-4ba8f2efef16.png)
 ![2022-10-06 (6)](https://user-images.githubusercontent.com/62959991/194217646-e652eeda-b37d-47de-85f4-958f9d320e3e.png)
 Map after some city node movements, notice path has updated!
 ![2022-10-06 (7)](https://user-images.githubusercontent.com/62959991/194217686-d4a4b919-a3e6-452c-8e19-28a0f087741a.png)
