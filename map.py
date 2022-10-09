@@ -3,17 +3,19 @@ David Blackstone
 A* search graph visualization
 10/5/22
 '''
+from email.policy import default
 import pygame
 import sys, random, math
 
 SCREEN_HEIGHT, SCREEN_WIDTH = (720, 1280)
-LINK_COLOR  = (255, 255, 255)
-LABEL_COLOR = (255, 255, 255)
-PATH_COLOR  = (255, 0, 0)
-START_COLOR = (0, 255, 0)
-DEST_COLOR  = (255, 0, 0)
-FPS         = 144
-LINE_WIDTH  = 5
+LINK_COLOR    = (255, 255, 255)
+LABEL_COLOR   = (255, 255, 255)
+DEFAULT_COLOR = (100, 100, 100)
+PATH_COLOR    = (255, 0, 0)
+START_COLOR   = (0, 255, 0)
+DEST_COLOR    = (255, 0, 0)
+FPS           = 144
+LINE_WIDTH    = 5
 
 pygame.init()
 screen   = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -83,7 +85,7 @@ def findShortestPath():
     while len(openList) > 0 or not endFound:
         currNode = openList[0]
         for i in range(len(openList)):
-            if(openList[i].getFCost() < currNode.getFCost()) or openList[i].getFCost() == currNode.getFCost() and openList[i].hCost < currNode.hCost:
+            if openList[i].getFCost() < currNode.getFCost() or openList[i].getFCost() == currNode.getFCost() and openList[i].hCost < currNode.hCost:
                 currNode = openList[i]
         openList.remove(currNode)
         closedList.append(currNode)
@@ -125,16 +127,16 @@ while running:
             pygame.quit()
             sys.exit()
         
-        elif event.type == pygame.MOUSEMOTION:
+        if event.type == pygame.MOUSEMOTION:
             if selected is not None and draggingNode:
                 nodeList[selected].rect.x = event.pos[0] + selected_offset_x
                 nodeList[selected].rect.y = event.pos[1] + selected_offset_y
         
-        elif event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 selected = None
         
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 draggingNode = True
                 for i, node in enumerate(nodeList):
@@ -150,7 +152,7 @@ while running:
                                 node.onPath = False
                             shortestPath()
                     
-            elif event.button == 3:
+            if event.button == 3:
                 draggingNode = False
                 for i, node in enumerate(nodeList):
                     dx = node.rect.centerx - event.pos[0]
@@ -215,7 +217,7 @@ while running:
             if event.key == pygame.K_m:
                 if linkStart != None and len(linkDestList) == 1:
                     for node in nodeList:
-                        node.color = (100,100,100)
+                        node.color = DEFAULT_COLOR
                     start = nodeList[sIndex]
                     startIndexPrev = sIndex
                     dest  = nodeList[dIndex]
@@ -238,11 +240,17 @@ while running:
                 nodeList.clear()
                 labelList = []
                 cityNumber = 1
-                labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0),100,200))
+                labelList.append(Label("STATUS: Nodes reset.", LABEL_COLOR, (0,0), 100, 200))
             if event.key == pygame.K_n:
                 if linkStart != None:
-                    nodeList[startIndexPrev].dest = False
-                    nodeList[sIndex].dest = True
+                    oldDest = nodeList[startIndexPrev]
+                    newDest = nodeList[sIndex]
+                    oldDest.color = DEFAULT_COLOR
+                    newDest.color = DEST_COLOR
+                    oldDest.dest = False
+                    newDest.dest = True
+                    nodeList[sIndex] = newDest
+                    nodeList[startIndexPrev] = oldDest
                     dest = linkStart
                     linkStart = None
     
