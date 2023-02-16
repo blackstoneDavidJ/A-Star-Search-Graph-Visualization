@@ -3,7 +3,6 @@ David Blackstone
 A* search graph visualization
 10/5/22
 '''
-from email.policy import default
 import pygame
 import sys, random, math
 
